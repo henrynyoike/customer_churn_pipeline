@@ -1,0 +1,23 @@
+
+name: "Telco Customer Churn Prediction"
+
+directories:
+  data: "./data/WA_Fn-UseC_-Telco-Customer-Churn.csv"
+
+dataset:
+  splits:
+    training_set: 0.7
+    validation_set: 0.10 
+    testing_set: 0.20
+
+  columns:
+    total:
+    used:
+
+environment:
+  python: 3.12.3
+  dependencies:
+    - pandas
+    - scikit-learn
+    - numpy
+
