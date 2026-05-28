@@ -3,7 +3,7 @@ from pandas import DataFrame
 import numpy as np
 import yaml
 
-class Dataloader : 
+class DataLoader: 
     def __init__(self , data_dir:str = None):
         self.data_dir = data_dir
 
@@ -38,7 +38,7 @@ class DataCleaner :
         print("Removing ('automatic') in payment methods...")
         self.data = self.remove_automatic()
 
-        print("Removing whitespaces...")
+        print("Removing and replacing whitespaces...")
         self.data = self.remove_whitespaces()
 
         print("Removing Duplicated data...")
@@ -69,31 +69,17 @@ class DataCleaner :
         return self.data
 
     def remove_automatic(self):
-        """Remove the data'(automatic) from the column paymentmethod'"""
-        self.data["paymentmethod"] = self.data["paymentmethod"].str.replace("(automatic)" , "")
+        """Remove the data (automatic) from the column paymentmethod'"""
+        self.data["paymentmethod"] = self.data["paymentmethod"].str.replace(r"\s*\(.*\)" , "", regex=True) 
         return self.data
 
     def remove_whitespaces(self):
         for col in self.data.select_dtypes(include=["object"]).columns:
             # Remove the whitespaces at the ends in order to replace those from the middle 
             self.data[col] = self.data[col].str.strip()
-            self.data[col] = self.data[col].str.replace(" " , "_")
+            self.data[col] = self.data[col].str.replace(r"\s" , "-" , regex=True)
         return self.data
 
     def drop_na_values(self):
         return self.data.dropna()
-
-loader = Dataloader(data_dir = "./data/WA_Fn-UseC_-Telco-Customer-Churn.csv")
-
-df = loader.load()
-
-cleaner = DataCleaner(data=df)
-
-data = cleaner.clean()
-
-
-
-
-
-
 
