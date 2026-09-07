@@ -2,27 +2,26 @@ import pandas as pd
 from pandas import DataFrame
 import numpy as np
 import yaml
+import os , sys 
 
 class DataLoader: 
     def __init__(self , data_dir:str = None):
         self.data_dir = data_dir
 
-    def load(self) :
-        try :
-            self.data = pd.read_csv(self.data_dir)
-            return self.data
-        except Exception as e :
-            if not self.data_dir :
-                print("Please pass data directory")
-            else:
-                print("Failed to load file : Please find a suitable file directory")
-        return None
+    def load(self):
+        if not os.path.exists(self.data_dir):
+            print(f"File Path : {self.data_dir} does not exist")
+            sys.exit()
+        data = pd.read_csv(self.data_dir)
+        
+        return data
 
 class DataCleaner :
-    def __init__(self , data : DataFrame = None):
+    def __init__(self ):
+        pass
+
+    def clean(self, data : DataFrame = None):
         self.data = data
-       
-    def clean(self):
         print("Lowering column names...")
         self.data = self.lower_col_names()
         
@@ -64,7 +63,7 @@ class DataCleaner :
         return self.data
 
     def convert_rowsto_lowercase(self):
-        for col in self.data.select_dtypes(include=["object"]).columns :
+        for col in self.data.select_dtypes(include=["str"]).columns :
             self.data[col] = self.data[col].str.lower()
         return self.data
 
@@ -74,7 +73,7 @@ class DataCleaner :
         return self.data
 
     def remove_whitespaces(self):
-        for col in self.data.select_dtypes(include=["object"]).columns:
+        for col in self.data.select_dtypes(include=["str"]).columns:
             # Remove the whitespaces at the ends in order to replace those from the middle 
             self.data[col] = self.data[col].str.strip()
             self.data[col] = self.data[col].str.replace(r"\s" , "-" , regex=True)
@@ -83,3 +82,29 @@ class DataCleaner :
     def drop_na_values(self):
         return self.data.dropna()
 
+class DataIntegrity : 
+    def __init_(self , data:DataFrame=None):
+        """
+        Checks the Integrity of the data i.e If it contains all the features and columns required
+        """ 
+        self.data = data
+
+    def _check_columns(self) -> bool:
+        """Checks if all the columns required are present"""
+        columns = ['customerid', 'gender', 'seniorcitizen', 'partner', 'dependents',
+       'tenure', 'phoneservice', 'multiplelines', 'internetservice',
+       'onlinesecurity', 'onlinebackup', 'deviceprotection', 'techsupport',
+       'streamingtv', 'streamingmovies', 'contract', 'paperlessbilling',
+       'paymentmethod', 'monthlycharges', 'totalcharges', 'churn']
+
+        if self.data.columns != colums:
+            print("Missing columns in")
+
+file_dir = "../data/WA_Fn-UseC_-Telco-Customer-Churn.csv"
+
+loader = DataLoader(data_dir=file_dir)
+data = loader.load()
+cleaner = DataCleaner()
+data = cleaner.clean(data)
+
+print(data.columns)

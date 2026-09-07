@@ -31,17 +31,17 @@ class Preprocessing:
         
         return cat_pipe
 
-parent_dir = Path(__file__).resolve().parent.parent
-data_dir = os.path.join(parent_dir , "data")
-file_dir = os.path.join(data_dir , "WA_Fn-UseC_-Telco-Customer-Churn.csv")
+# parent_dir = Path(__file__).resolve().parent.parent
+# data_dir = os.path.join(parent_dir , "data")
+# file_dir = os.path.join(data_dir , "WA_Fn-UseC_-Telco-Customer-Churn.csv")
 
-df = pd.read_csv(file_dir)
+# df = pd.read_csv(file_dir)
 
-df = DataCleaner(df).clean()
+# df = DataCleaner(df).clean()
 
-processor = Preprocessing(data = df)
+# processor = Preprocessing(data = df)
 
-processor.numerical_pipeline()
+# processor.numerical_pipeline()
 
     
 
