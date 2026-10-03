@@ -10,10 +10,9 @@ class DataLoader:
 
     def load(self):
         if not os.path.exists(self.data_dir):
-            print(f"File Path : {self.data_dir} does not exist")
+            print(f"[DataLoader]: File Path : {self.data_dir} does not exist")
             sys.exit()
         data = pd.read_csv(self.data_dir)
-        
         return data
 
 class DataCleaner :
@@ -43,6 +42,8 @@ class DataCleaner :
         print("Removing Duplicated data...")
         self.data = self.drop_na_values()
 
+        print("Data Cleaned Successfully !!!")
+
         return self.data
 
     def lower_col_names(self):
@@ -63,7 +64,7 @@ class DataCleaner :
         return self.data
 
     def convert_rowsto_lowercase(self):
-        for col in self.data.select_dtypes(include=["str"]).columns :
+        for col in self.data.select_dtypes(include=["object"]).columns :
             self.data[col] = self.data[col].str.lower()
         return self.data
 
@@ -73,7 +74,7 @@ class DataCleaner :
         return self.data
 
     def remove_whitespaces(self):
-        for col in self.data.select_dtypes(include=["str"]).columns:
+        for col in self.data.select_dtypes(include=["object"]).columns:
             # Remove the whitespaces at the ends in order to replace those from the middle 
             self.data[col] = self.data[col].str.strip()
             self.data[col] = self.data[col].str.replace(r"\s" , "-" , regex=True)
@@ -83,28 +84,61 @@ class DataCleaner :
         return self.data.dropna()
 
 class DataIntegrity : 
-    def __init_(self , data:DataFrame=None):
+    def __init_(self):
         """
         Checks the Integrity of the data i.e If it contains all the features and columns required
         """ 
-        self.data = data
+        self.integrity = False 
 
-    def _check_columns(self) -> bool:
+    def validate(self , data:DataFrame=None):
+        if self._check_columns(data) and self._check_col_dtype(data):
+            self.integrity = True
+
+            print("Data Validated Successfully !!!")
+            return True
+        else:
+            return False
+
+    def _check_columns(self , data:DataFrame=None) -> bool:
         """Checks if all the columns required are present"""
-        columns = ['customerid', 'gender', 'seniorcitizen', 'partner', 'dependents',
+        columns = ['customerid' , 'gender', 'seniorcitizen', 'partner', 'dependents',
        'tenure', 'phoneservice', 'multiplelines', 'internetservice',
        'onlinesecurity', 'onlinebackup', 'deviceprotection', 'techsupport',
        'streamingtv', 'streamingmovies', 'contract', 'paperlessbilling',
        'paymentmethod', 'monthlycharges', 'totalcharges', 'churn']
 
-        if self.data.columns != colums:
-            print("Missing columns in")
+        for col in columns :
+            if col not in data.columns :
+                print(f"[DataValidator] : Column '{col}' not found in data provided")
+                return False
+        return True
 
-file_dir = "../data/WA_Fn-UseC_-Telco-Customer-Churn.csv"
+    def _check_col_dtype(self , data) -> bool :
+        """Checks if the provided columns are of the required dtype"""
+        data_types={"customerid":"object",
+             "gender":"object",
+             "seniorcitizen":"int64",
+             "partner":"object",
+             "dependents":"object",
+             "tenure":"int64",
+             "phoneservice":"object",
+             "multiplelines":"object",
+             "internetservice":"object",
+             "onlinesecurity":"object",
+             "onlinebackup":"object",
+             "deviceprotection":"object",
+             "techsupport":"object",
+             "streamingtv":"object",
+             "streamingmovies":"object",
+             "contract":"object",
+             "paperlessbilling":"object",
+             "paymentmethod":"object",
+             "monthlycharges":"float64",
+             "totalcharges":"float64",
+             "churn":"object"}
 
-loader = DataLoader(data_dir=file_dir)
-data = loader.load()
-cleaner = DataCleaner()
-data = cleaner.clean(data)
-
-print(data.columns)
+        for col in data_types:
+            if data_types[col] != data.dtypes[col]:
+                print(f"[DataValidator] : dtype '{data.dtypes[col]}' of '{col}' does not match required dtype '{data_types[col]}'")
+                sys.exit()
+        return True        

@@ -1,50 +1,38 @@
 """The main Model for the Churn Pipeline"""
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier , GradientBoostingClassifier , VotingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.compose import ColumnTransfomer
+from sklearn.linear_model import LogisticRegression
+from numpy.typing import ArrayLike
 from pandas import DataFrame
 import sys
+from typing_extensions import Literal
 
-class ChurnModel :
-    def __init__(self ,data:DataFrame=None,train:bool=False) -> None:
-        """
-        Class used to train the model and predict the churn data 
-        """
-        self.train = train
-        self.model_trained = False # since model is not initially trained
-        return None
+class ChurnModel:
+    def __init__(self , 
+            categorical_model:Literal["random_forest" , "gradient_boosting_classifier" , "decision_tree"]="random_forest",
+                 numerical_model:Literal["random_forest" , "gradient_boosting_classifier" , "decision_tree"]="gradient_boosting_classifier"):
 
-    def __model(self):
-        model = RandomForestClassifier()
-        return model
+        model_dict = {
+            "random_forest" : RandomForestClassifier() , 
+            "gradient_boosting_classifier": GradientBoostingClassifier() , 
+            "decision_tree" : DecisionTreeClassifier()
+        }
 
-    def train(self,X:DataFrame=None,y:DataFrame=None) -> bool:
-        if not self.train: # Ensure Model is in training mode
-            sys.exit("Error : Cannot train model in prediction mode.Please set 'train=True.'")
-        
-        model = self.__model()
-        
-        try:
-            model.train(X,y)
-        except Exception as e:
-            print(e)
-            return False    
+        self.cat_model = model_dict[categorical_model]
+        self.num_model = model_dict[numerical_model]
 
-        self.model_trained = True # Setting for model training
-        return True
-
-    def predict(self , X_data:DataFrame=None)-> DataFrame:
-        pass
-    
+    def fit(self , categorical_features:ArrayLike=None , numerical_features:ArrayLike=None , y:ArrayLike=None):
+        # Fit the Chosen models
+        self.columns_transfomer = ColumnTransfomer(transformers=[
+                ("numerical_model" , self.num_model , numerical_features) , 
+                ("categorical_model" , self.cat_model , categorical_features)
+        ])
 
 
+     
 
-
-
-
-
-
-
-
-
+        return self.voting_clf.fit(X ,y)
 
 
 
