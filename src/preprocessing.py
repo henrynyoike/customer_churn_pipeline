@@ -1,4 +1,3 @@
-
 import os
 import pandas as pd
 from pandas import DataFrame
@@ -23,23 +22,22 @@ class Preprocessor:
 
         return num_transformed , cat_transformed
 
-    def preprocess_target(self , y:ArrayLike=None):
-        """Preprocess the Target variable using a LabelEncoder"""
-        label_encoder = LabelEncoder()
-        return label_encoder.fit_transform(y)
-
     def numerical_pipeline(self) -> Pipeline :
-        """Transformer for numerical features"""
+        """Pipeline for numerical features"""
         num_pipe = Pipeline(steps = [
             ("num_imputer" , SimpleImputer(strategy="median")),
             ("num_scaler"  , StandardScaler())
         ])
         return num_pipe
 
+    def target_encoder(self):
+        """Encoding Target Variables"""
+        return LabelEncoder()
+
     def categorical_pipeline(self) -> Pipeline :
-        """Transformer for categorical features""" 
+        """Pipeline for categorical features""" 
         self.cat_pipe = Pipeline(steps = [
             ("cat_imputer" , SimpleImputer(strategy="most_frequent")) ,
-            ("cat_encoder" , OneHotEncoder(handle_unknown="error"))
+            ("cat_encoder" , OrdinalEncoder(handle_unknown="error"))
         ])  
         return self.cat_pipe
